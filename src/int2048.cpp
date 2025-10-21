@@ -204,6 +204,7 @@ void int2048::read(const std::string &s) {
   bool nneg = false;
   if (i < (int)s.size() && (s[i] == '+' || s[i] == '-')) { nneg = (s[i] == '-'); ++i; }
   while (i < (int)s.size() && s[i] == '0') ++i;
+  if (i >= (int)s.size()) { d.clear(); neg = false; return; }
   for (int j = (int)s.size() - 1; j >= i; j -= base_digits) {
     int x = 0;
     int l = std::max(i, j - base_digits + 1);
