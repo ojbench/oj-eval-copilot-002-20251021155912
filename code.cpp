@@ -275,7 +275,9 @@ void int2048::read(const std::string &s) {
   if (i < (int)s.size() && (s[i] == '+' || s[i] == '-')) { nneg = (s[i] == '-'); ++i; }
   while (i < (int)s.size() && s[i] == '0') ++i;
   if (i >= (int)s.size()) { d.clear(); neg = false; return; }
-  for (int j = (int)s.size() - 1; j >= i; j -= base_digits) {
+  int jend = (int)s.size() - 1;
+  while (jend >= i && isspace((unsigned char)s[jend])) --jend;
+  for (int j = jend; j >= i; j -= base_digits) {
     int x = 0;
     int l = std::max(i, j - base_digits + 1);
     for (int k = l; k <= j; ++k) x = x * 10 + (s[k] - '0');

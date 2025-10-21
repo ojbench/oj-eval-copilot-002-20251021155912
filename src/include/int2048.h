@@ -83,6 +83,11 @@ public:
   int2048 &operator%=(const int2048 &);
   friend int2048 operator%(int2048, const int2048 &);
 
+  // Ensure free function declarations are visible for unqualified lookup
+  friend int2048 add(int2048, const int2048 &);
+  friend int2048 minus(int2048, const int2048 &);
+
+
   friend std::istream &operator>>(std::istream &, int2048 &);
   friend std::ostream &operator<<(std::ostream &, const int2048 &);
 

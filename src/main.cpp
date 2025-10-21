@@ -13,6 +13,8 @@ int main(){
     if(op=="readprint"){ string s; cin>>s; int2048 x(s); cout<<x<<"\n"; }
     else if(op=="add"){ string a,b; cin>>a>>b; int2048 x(a), y(b); cout<<(x+y)<<"\n"; }
     else if(op=="sub"){ string a,b; cin>>a>>b; int2048 x(a), y(b); cout<<(x-y)<<"\n"; }
+    else if(op=="addm"){ string a,b; cin>>a>>b; int2048 x; x.read(a); int2048 y; y.read(b); x.add(y); x.print(); cout<<"\n"; }
+    else if(op=="subm"){ string a,b; cin>>a>>b; int2048 x; x.read(a); int2048 y; y.read(b); x.minus(y); x.print(); cout<<"\n"; }
     else if(op=="mul"){ string a,b; cin>>a>>b; int2048 x(a), y(b); cout<<(x*y)<<"\n"; }
     else if(op=="div"){ string a,b; cin>>a>>b; int2048 x(a), y(b); cout<<(x/y)<<"\n"; }
     else if(op=="mod"){ string a,b; cin>>a>>b; int2048 x(a), y(b); cout<<(x%y)<<"\n"; }
