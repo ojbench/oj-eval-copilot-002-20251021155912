@@ -313,7 +313,9 @@ int2048 &int2048::operator+=(const int2048 &rhs) {
   } else {
     int cmp = absCmp(*this, rhs);
     if (cmp >= 0) {
+      bool old = this->neg;
       *this = absSub(*this, rhs);
+      this->neg = old && !this->d.empty();
     } else {
       int2048 r = absSub(rhs, *this);
       r.neg = rhs.neg;
