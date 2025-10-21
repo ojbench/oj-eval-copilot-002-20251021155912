@@ -1,14 +1,92 @@
-#include "int2048.h"
+// Combined submission file for int2048
+#include <complex>
+#include <cstdio>
+#include <cstring>
+#include <iostream>
+#include <vector>
+#include <string>
+
+#pragma once
+#ifndef SJTU_BIGINTEGER
+#define SJTU_BIGINTEGER
 
 namespace sjtu {
+class int2048 {
+private:
+  static const int base = 10000; // 1e4
+  static const int base_digits = 4;
+  std::vector<int> d; // little-endian digits
+  bool neg;
+  void trim();
+  static int absCmp(const int2048 &, const int2048 &);
+  static int2048 absAdd(const int2048 &, const int2048 &);
+  static int2048 absSub(const int2048 &, const int2048 &); // assume |a|>=|b|
+  static int2048 mulSchool(const std::vector<int> &, const std::vector<int> &);
+  static std::pair<int2048, int2048> divmod(const int2048 &, const int2048 &);
+public:
+  // 构造函数
+  int2048();
+  int2048(long long);
+  int2048(const std::string &);
+  int2048(const int2048 &);
 
+  // 读入一个大整数
+  void read(const std::string &);
+  // 输出储存的大整数，无需换行
+  void print();
+
+  // 加上一个大整数
+  int2048 &add(const int2048 &);
+  // 返回两个大整数之和
+  friend int2048 add(int2048, const int2048 &);
+
+  // 减去一个大整数
+  int2048 &minus(const int2048 &);
+  // 返回两个大整数之差
+  friend int2048 minus(int2048, const int2048 &);
+
+  int2048 operator+() const;
+  int2048 operator-() const;
+
+  int2048 &operator=(const int2048 &);
+
+  int2048 &operator+=(const int2048 &);
+  friend int2048 operator+(int2048, const int2048 &);
+
+  int2048 &operator-=(const int2048 &);
+  friend int2048 operator-(int2048, const int2048 &);
+
+  int2048 &operator*=(const int2048 &);
+  friend int2048 operator*(int2048, const int2048 &);
+
+  int2048 &operator/=(const int2048 &);
+  friend int2048 operator/(int2048, const int2048 &);
+
+  int2048 &operator%=(const int2048 &);
+  friend int2048 operator%(int2048, const int2048 &);
+
+  friend std::istream &operator>>(std::istream &, int2048 &);
+  friend std::ostream &operator<<(std::ostream &, const int2048 &);
+
+  friend bool operator==(const int2048 &, const int2048 &);
+  friend bool operator!=(const int2048 &, const int2048 &);
+  friend bool operator<(const int2048 &, const int2048 &);
+  friend bool operator>(const int2048 &, const int2048 &);
+  friend bool operator<=(const int2048 &, const int2048 &);
+  friend bool operator>=(const int2048 &, const int2048 &);
+};
+} // namespace sjtu
+
+#endif
+
+// Implementation
+namespace sjtu {
 namespace {
 using cd = std::complex<double>;
 const double PI = 3.1415926535897932384626433832795;
 
 void fft(std::vector<cd> &a, bool invert) {
   int n = (int)a.size();
-  // bit-reverse permutation
   for (int i = 1, j = 0; i < n; ++i) {
     int bit = n >> 1;
     for (; j & bit; bit >>= 1) j ^= bit;
@@ -84,7 +162,6 @@ int2048 int2048::absAdd(const int2048 &a, const int2048 &b) {
 }
 
 int2048 int2048::absSub(const int2048 &a, const int2048 &b) {
-  // assume |a| >= |b|
   int2048 r; r.neg = false; r.d.resize(a.d.size(), 0);
   int carry = 0; size_t i = 0;
   for (; i < a.d.size(); ++i) {
@@ -120,7 +197,6 @@ std::pair<int2048, int2048> int2048::divmod(const int2048 &A, const int2048 &B) 
   int n = (int)a.d.size();
   int norm = base / (b.d.back() + 1);
   if (norm > 1) {
-    // multiply a and b by norm
     long long carry = 0; for (size_t i = 0; i < a.d.size() || carry; ++i) {
       if (i == a.d.size()) a.d.push_back(0);
       long long cur = 1LL * (i < a.d.size() ? a.d[i] : 0) * norm + carry;
@@ -145,8 +221,7 @@ std::pair<int2048, int2048> int2048::divmod(const int2048 &A, const int2048 &B) 
     while (m > 1 && qhat * v[m - 2] > base * rhat + u[k + m - 2]) {
       --qhat; rhat += v[m - 1]; if (rhat >= base) break;
     }
-    // multiply and subtract
-    long long borrow = 0, carry = 0;
+    long long borrow = 0;
     for (int j = 0; j < m; ++j) {
       long long cur = u[k + j] - qhat * 1LL * v[j] - borrow;
       borrow = 0;
@@ -155,7 +230,6 @@ std::pair<int2048, int2048> int2048::divmod(const int2048 &A, const int2048 &B) 
     }
     long long curk = u[k + m] - borrow;
     if (curk < 0) {
-      // qhat too big
       --qhat;
       long long c = 0;
       for (int j = 0; j < m; ++j) {
@@ -169,10 +243,8 @@ std::pair<int2048, int2048> int2048::divmod(const int2048 &A, const int2048 &B) 
     }
     q.d[k] = int(qhat);
   }
-  // remainder
   int2048 r; r.d.assign(m, 0);
   for (int i = 0; i < m; ++i) r.d[i] = u[i];
-  // undo normalization
   if (norm > 1) {
     long long carry = 0;
     for (int i = m - 1; i >= 0; --i) {
@@ -185,7 +257,6 @@ std::pair<int2048, int2048> int2048::divmod(const int2048 &A, const int2048 &B) 
   return {q, r};
 }
 
-// Constructors
 int2048::int2048() : d(), neg(false) {}
 
 int2048::int2048(long long v) : d(), neg(false) {
@@ -197,7 +268,6 @@ int2048::int2048(const std::string &s) : d(), neg(false) { read(s); }
 
 int2048::int2048(const int2048 &o) = default;
 
-// IO
 void int2048::read(const std::string &s) {
   d.clear(); neg = false;
   int i = 0; while (i < (int)s.size() && isspace((unsigned char)s[i])) ++i;
@@ -226,13 +296,11 @@ void int2048::print() {
   }
 }
 
-// Basic ops
 int2048 &int2048::add(const int2048 &rhs) { return (*this) += rhs; }
 int2048 add(int2048 lhs, const int2048 &rhs) { lhs += rhs; return lhs; }
 int2048 &int2048::minus(const int2048 &rhs) { return (*this) -= rhs; }
 int2048 minus(int2048 lhs, const int2048 &rhs) { lhs -= rhs; return lhs; }
 
-// Operators
 int2048 int2048::operator+() const { return *this; }
 int2048 int2048::operator-() const { int2048 r(*this); if (!r.d.empty()) r.neg = !r.neg; return r; }
 
@@ -246,7 +314,6 @@ int2048 &int2048::operator+=(const int2048 &rhs) {
     int cmp = absCmp(*this, rhs);
     if (cmp >= 0) {
       *this = absSub(*this, rhs);
-      // sign stays this->neg
     } else {
       int2048 r = absSub(rhs, *this);
       r.neg = rhs.neg;
@@ -267,7 +334,6 @@ int2048 operator-(int2048 lhs, const int2048 &rhs) { lhs -= rhs; return lhs; }
 
 int2048 &int2048::operator*=(const int2048 &rhs) {
   bool res_neg = neg ^ rhs.neg;
-  // choose method
   int n = (int)d.size(), m = (int)rhs.d.size();
   int2048 r;
   if ((long long)n * m <= 20000) r = mulSchool(d, rhs.d);
@@ -285,7 +351,6 @@ int2048 &int2048::operator/=(const int2048 &rhs) {
   int2048 q = qr.first; int2048 r = qr.second; // q,r are magnitudes for |a|/|b|
   if (res_neg) {
     if (!r.d.empty()) {
-      // floor toward -inf: -(q) - 1 => magnitude q+1, negative sign
       int2048 one(1);
       q = absAdd(q, one);
       q.neg = true;
@@ -307,11 +372,10 @@ int2048 &int2048::operator%=(const int2048 &rhs) {
   auto qr = divmod(*this, rhs);
   int2048 r = qr.second; // magnitude remainder for |a|/|b|
   if (!r.d.empty() && diff) {
-    // r = |b| - r
     int2048 bb = rhs; bb.neg = false;
     r = absSub(bb, r);
   }
-  r.neg = (!r.d.empty()) && rhs.neg; // sign of remainder same as divisor for floor definition
+  r.neg = (!r.d.empty()) && rhs.neg;
   r.trim();
   *this = r;
   return *this;

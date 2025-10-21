@@ -14,12 +14,23 @@
 #include <cstring>
 #include <iostream>
 #include <vector>
+#include <string>
 
 // 请不要使用 using namespace std;
 
 namespace sjtu {
 class int2048 {
-  // todo
+private:
+  static const int base = 10000; // 1e4
+  static const int base_digits = 4;
+  std::vector<int> d; // little-endian digits
+  bool neg;
+  void trim();
+  static int absCmp(const int2048 &, const int2048 &);
+  static int2048 absAdd(const int2048 &, const int2048 &);
+  static int2048 absSub(const int2048 &, const int2048 &); // assume |a|>=|b|
+  static int2048 mulSchool(const std::vector<int> &, const std::vector<int> &);
+  static std::pair<int2048, int2048> divmod(const int2048 &, const int2048 &);
 public:
   // 构造函数
   int2048();
